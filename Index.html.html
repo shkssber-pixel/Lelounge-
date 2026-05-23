@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>lelounge — Menu</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0a0a0a; --surface:#111; --surface2:#1a1a1a;
+    --gold:#c8a96e; --gold2:#e8c98e; --cream:#f5f0e8;
+    --accent:#ff6b35; --text:#f0ebe0; --muted:#8a8070;
+    --border:rgba(200,169,110,0.2);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;min-height:100vh;overflow-x:hidden;}
+  body[dir="ltr"]{font-family:'Playfair Display','Tajawal',sans-serif;}
+  body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:1000;opacity:0.4;}
+  .ambient{position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0;}
+  .ambient-1{width:500px;height:500px;background:radial-gradient(circle,rgba(200,169,110,0.08),transparent 70%);top:-100px;right:-100px;animation:drift1 8s ease-in-out infinite;}
+  .ambient-2{width:400px;height:400px;background:radial-gradient(circle,rgba(255,107,53,0.06),transparent 70%);bottom:20%;left:-80px;animation:drift2 10s ease-in-out infinite;}
+  @keyframes drift1{0%,100%{transform:translate(0,0)}50%{transform:translate(-30px,40px)}}
+  @keyframes drift2{0%,100%{transform:translate(0,0)}50%{transform:translate(20px,-30px)}}
+
+  /* LANG BAR */
+  .lang-bar{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:rgba(10,10,10,0.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+  .lang-btns{display:flex;gap:8px;}
+  .lang-btn{padding:6px 16px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Tajawal',sans-serif;font-size:0.82rem;cursor:pointer;transition:all 0.3s;letter-spacing:0.05em;}
+  .lang-btn.active{background:var(--gold);color:var(--bg);border-color:var(--gold);font-weight:700;}
+  .lang-btn:hover:not(.active){border-color:var(--gold);color:var(--gold);}
+  .edit-pill{display:flex;align-items:center;gap:8px;cursor:pointer;}
+  .toggle-sw{width:44px;height:24px;background:var(--surface2);border-radius:12px;position:relative;border:1px solid var(--border);transition:background 0.3s;}
+  .toggle-sw.on{background:var(--gold);}
+  .toggle-sw::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:var(--cream);top:2px;right:2px;transition:transform 0.3s;}
+  .toggle-sw.on::after{transform:translateX(-20px);}
+  .edit-lbl{font-size:0.78rem;color:var(--muted);}
+  .edit-lbl.on{color:var(--gold);}
+
+  /* HEADER */
+  header{position:relative;text-align:center;padding:90px 20px 36px;z-index:10;}
+  /* LOGO IMAGE */
+  .logo-img-wrap{position:relative;width:110px;height:110px;margin:0 auto 18px;cursor:pointer;}
+  .logo-img-wrap img{width:100%;height:100%;object-fit:contain;border-radius:50%;border:2px solid var(--border);background:var(--surface2);padding:6px;transition:transform 0.3s,box-shadow 0.3s;}
+  .logo-img-wrap:hover img{transform:scale(1.05);box-shadow:0 0 30px rgba(200,169,110,0.3);}
+  .logo-img-placeholder{width:100%;height:100%;border-radius:50%;border:2px dashed var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:2.5rem;transition:border-color 0.3s;}
+  .logo-img-wrap:hover .logo-img-placeholder{border-color:var(--gold);}
+  .logo-upload-hint{position:absolute;inset:0;border-radius:50%;background:rgba(0,0,0,0.55);display:none;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:0.65rem;color:var(--cream);letter-spacing:0.08em;text-transform:uppercase;}
+  .logo-upload-hint span{font-size:1.4rem;}
+  body.editing .logo-img-wrap:hover .logo-upload-hint{display:flex;}
+  .logo-remove-btn{position:absolute;top:-4px;right:-4px;width:24px;height:24px;border-radius:50%;background:rgba(255,50,50,0.9);border:none;color:#fff;font-size:0.7rem;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:10;}
+  body.editing .logo-remove-btn.visible{display:flex;}
+
+  /* LOGO TEXT */
+  .logo-text-wrap{position:relative;display:inline-block;}
+  .logo-text{font-family:'Playfair Display',serif;font-size:clamp(2.5rem,8vw,5rem);font-weight:900;letter-spacing:-0.02em;background:linear-gradient(135deg,var(--gold) 0%,var(--gold2) 40%,var(--cream) 60%,var(--gold) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% 100%;animation:shimmer 3s ease-in-out infinite;}
+  @keyframes shimmer{0%{background-position:100% 50%}50%{background-position:0% 50%}100%{background-position:100% 50%}}
+  .logo-tagline{margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:2px;}
+  .logo-tagline-ar{font-family:'Tajawal',sans-serif;font-size:1.05rem;font-weight:500;color:var(--gold2);letter-spacing:0.08em;}
+  .logo-tagline-en{font-family:'Playfair Display',serif;font-size:0.78rem;font-style:italic;color:var(--muted);letter-spacing:0.3em;text-transform:uppercase;}
+  .logo-sub{font-size:0.72rem;letter-spacing:0.4em;color:var(--muted);text-transform:uppercase;margin-top:10px;}
+  .header-line{width:120px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:18px auto 0;animation:pulse-line 2s ease-in-out infinite;}
+  @keyframes pulse-line{0%,100%{opacity:0.5;width:80px}50%{opacity:1;width:160px}}
+
+  /* NAV */
+  .nav-wrap{position:sticky;top:46px;z-index:90;background:rgba(10,10,10,0.9);backdrop-filter:blur(20px);padding:0 20px;border-bottom:1px solid var(--border);}
+  .nav-tabs{display:flex;overflow-x:auto;scrollbar-width:none;justify-content:center;flex-wrap:wrap;}
+  .nav-tabs::-webkit-scrollbar{display:none}
+  .tab-btn{background:none;border:none;color:var(--muted);font-family:'Tajawal',sans-serif;font-size:0.9rem;padding:15px 20px;cursor:pointer;position:relative;transition:color 0.3s;white-space:nowrap;display:flex;align-items:center;gap:6px;}
+  .tab-btn::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--gold);transform:scaleX(0);transition:transform 0.3s;}
+  .tab-btn.active{color:var(--gold);}
+  .tab-btn.active::after{transform:scaleX(1);}
+  .tab-btn:hover{color:var(--cream);}
+
+  /* SECTIONS */
+  .section{display:none;padding:40px 20px 60px;max-width:1100px;margin:0 auto;position:relative;z-index:10;}
+  .section.active{display:block;}
+  .section-header{text-align:center;margin-bottom:48px;}
+  .section-title{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,5vw,3rem);color:var(--gold);margin-bottom:8px;opacity:0;animation:fadeUp 0.6s ease forwards;}
+  .section-desc{color:var(--muted);font-size:0.9rem;letter-spacing:0.15em;text-transform:uppercase;opacity:0;animation:fadeUp 0.6s ease 0.15s forwards;}
+  .section-emoji{font-size:3rem;display:inline-block;margin-bottom:12px;opacity:0;animation:floatFadeIn 0.6s ease forwards;}
+  @keyframes floatFadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+  /* GRID */
+  .menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;}
+
+  /* CARD */
+  .menu-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden;position:relative;transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.4s;opacity:0;animation:cardIn 0.5s ease forwards;}
+  .menu-card:hover{transform:translateY(-8px) scale(1.01);box-shadow:0 20px 60px rgba(200,169,110,0.15),0 0 0 1px rgba(200,169,110,0.3);}
+  @keyframes cardIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+  .menu-card:nth-child(1){animation-delay:0.1s}.menu-card:nth-child(2){animation-delay:0.2s}
+  .menu-card:nth-child(3){animation-delay:0.3s}.menu-card:nth-child(4){animation-delay:0.4s}
+
+  /* CARD IMAGE AREA */
+  .card-img-wrap{height:200px;background:var(--surface2);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+  .card-img-wrap img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;animation:imgFloat 4s ease-in-out infinite;transform-origin:center;}
+  @keyframes imgFloat{0%,100%{transform:scale(1.02) translateY(0px)}50%{transform:scale(1.06) translateY(-6px)}}
+  .card-emoji{font-size:5rem;animation:float 3s ease-in-out infinite;filter:drop-shadow(0 10px 20px rgba(0,0,0,0.5));transition:transform 0.3s;position:relative;z-index:1;}
+  .menu-card:hover .card-emoji{animation:bounce-hover 0.6s ease;}
+  @keyframes float{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-12px) rotate(2deg)}}
+  @keyframes bounce-hover{0%{transform:scale(1)}40%{transform:scale(1.3) rotate(10deg)}70%{transform:scale(0.9) rotate(-5deg)}100%{transform:scale(1.1) rotate(0deg)}}
+  .card-bg-glow{position:absolute;inset:0;opacity:0;transition:opacity 0.4s;}
+  .menu-card:hover .card-bg-glow{opacity:1;}
+
+  /* IMAGE UPLOAD OVERLAY — shown only in edit mode */
+  .img-upload-overlay{display:none;position:absolute;inset:0;z-index:5;background:rgba(0,0,0,0.55);backdrop-filter:blur(2px);flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer;transition:opacity 0.3s;}
+  /* Desktop: show on hover */
+  @media(hover:hover){
+    body.editing .card-img-wrap:hover .img-upload-overlay{display:flex;}
+    .menu-card.has-img .img-upload-overlay{display:flex;opacity:0;}
+    .menu-card.has-img .card-img-wrap:hover .img-upload-overlay{opacity:1;}
+  }
+  /* Mobile/touch: always show overlay in edit mode */
+  @media(hover:none){
+    body.editing .card-img-wrap .img-upload-overlay{display:flex;background:rgba(0,0,0,0.35);}
+  }
+  .img-upload-overlay .upload-icon{font-size:2.2rem;}
+  .img-upload-overlay .upload-txt{font-size:0.8rem;color:var(--cream);letter-spacing:0.1em;text-transform:uppercase;}
+  .img-upload-overlay .remove-img-btn{margin-top:4px;background:rgba(255,50,50,0.8);border:none;color:#fff;font-size:0.72rem;padding:4px 12px;border-radius:20px;cursor:pointer;display:none;}
+  .menu-card.has-img .img-upload-overlay .remove-img-btn{display:block;}
+  /* hidden file input */
+  .img-file-input{display:none;}
+
+  .card-badge{position:absolute;top:12px;left:12px;background:var(--accent);color:white;font-size:0.65rem;font-weight:700;letter-spacing:0.1em;padding:4px 10px;border-radius:20px;text-transform:uppercase;animation:pulse-badge 2s ease-in-out infinite;z-index:6;}
+  [dir="ltr"] .card-badge{left:auto;right:12px;}
+  @keyframes pulse-badge{0%,100%{box-shadow:0 0 0 0 rgba(255,107,53,0.4)}50%{box-shadow:0 0 0 8px rgba(255,107,53,0)}}
+
+  .card-body{padding:20px;}
+  .card-name{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--cream);margin-bottom:6px;font-weight:700;outline:none;}
+  .card-desc{color:var(--muted);font-size:0.85rem;line-height:1.6;margin-bottom:16px;outline:none;}
+  .card-footer{display:flex;align-items:center;justify-content:space-between;}
+  .card-price{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--gold);font-weight:700;outline:none;}
+  .price-curr{font-size:0.8rem;color:var(--muted);margin-right:2px;}
+  [dir="ltr"] .price-curr{margin-right:0;margin-left:2px;}
+  .card-add-btn{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;color:var(--bg);font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform 0.3s,box-shadow 0.3s;font-weight:700;}
+  .card-add-btn:hover{transform:scale(1.15) rotate(90deg);box-shadow:0 0 20px rgba(200,169,110,0.5);}
+
+  /* EDIT MODE */
+  [contenteditable="true"]{border-bottom:1px dashed var(--gold);cursor:text;padding-bottom:2px;}
+  .card-delete{position:absolute;top:12px;right:12px;width:30px;height:30px;border-radius:50%;background:rgba(255,50,50,0.8);border:none;color:white;font-size:0.9rem;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:10;transition:transform 0.2s;}
+  [dir="ltr"] .card-delete{right:auto;left:12px;}
+  .card-delete:hover{transform:scale(1.2);}
+  body.editing .card-delete{display:flex;}
+
+  .add-card-btn{background:transparent;border:2px dashed rgba(200,169,110,0.3);border-radius:20px;display:none;flex-direction:column;align-items:center;justify-content:center;min-height:320px;cursor:pointer;color:var(--muted);font-family:'Tajawal',sans-serif;font-size:0.9rem;gap:12px;transition:all 0.3s;}
+  body.editing .add-card-btn{display:flex;}
+  .add-card-btn:hover{border-color:var(--gold);color:var(--gold);background:rgba(200,169,110,0.05);}
+  .add-card-btn .plus-icon{width:50px;height:50px;border-radius:50%;border:2px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:1.8rem;transition:transform 0.3s;}
+  .add-card-btn:hover .plus-icon{transform:rotate(90deg) scale(1.1);}
+
+  /* TOAST */
+  .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--surface2);border:1px solid var(--gold);border-radius:50px;padding:12px 24px;color:var(--gold);font-size:0.85rem;z-index:9999;transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);pointer-events:none;}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+
+  /* PARTICLES */
+  .particle{position:fixed;pointer-events:none;z-index:5;animation:particle-float linear infinite;opacity:0;}
+  @keyframes particle-float{0%{transform:translateY(100vh) rotate(0deg);opacity:0}10%{opacity:0.4}90%{opacity:0.2}100%{transform:translateY(-20vh) rotate(720deg);opacity:0}}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px}
+  @media(max-width:600px){.menu-grid{grid-template-columns:1fr}.nav-tabs{justify-content:flex-start}.tab-btn{padding:14px 12px;font-size:0.8rem}}
+</style>
+</head>
+<body>
+<div class="ambient ambient-1"></div>
+<div class="ambient ambient-2"></div>
+<div class="toast" id="toast"></div>
+
+<!-- Hidden file input (shared, reused) -->
+<input type="file" id="globalFileInput" class="img-file-input" accept="image/*">
+<input type="file" id="logoFileInput" class="img-file-input" accept="image/*">
+
+<!-- Top Bar -->
+<div class="lang-bar">
+  <div class="lang-btns">
+    <button class="lang-btn active" id="btnAr" onclick="setLang('ar')">🇸🇦 عربي</button>
+    <button class="lang-btn" id="btnEn" onclick="setLang('en')">🇬🇧 English</button>
+  </div>
+  <div class="edit-pill" onclick="toggleEdit()">
+    <span class="edit-lbl" id="editLbl">عرض</span>
+    <div class="toggle-sw" id="editToggle"></div>
+    <span class="edit-lbl on" id="editMode2">تعديل</span>
+  </div>
+</div>
+
+<header>
+  <!-- Logo image upload -->
+  <div class="logo-img-wrap" id="logoImgWrap" onclick="editMode&&document.getElementById('logoFileInput').click()">
+    <div class="logo-img-placeholder" id="logoPlaceholder">☕</div>
+    <div class="logo-upload-hint"><span>📷</span>رفع لوجو</div>
+    <button class="logo-remove-btn" id="logoRemoveBtn" onclick="removeLogo(event)">✕</button>
+  </div>
+  <!-- Brand name -->
+  <div class="logo-text-wrap">
+    <div class="logo-text">lelounge</div>
+    <div class="logo-tagline">
+      <div class="logo-tagline-ar">لا لاونج — حيث يلتقي الذوق بالأناقة</div>
+      <div class="logo-tagline-en">Where Taste Meets Elegance</div>
+    </div>
+  </div>
+  <div class="logo-sub" id="logoSub">تجربة قهوة فريدة</div>
+  <div class="header-line"></div>
+</header>
+
+<div class="nav-wrap"><div class="nav-tabs" id="navTabs"></div></div>
+<div id="sectionsContainer"></div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const MENU = {
+  ar:{
+    logoSub:"تجربة قهوة فريدة",toastAdd:"✓ تمت الإضافة",addItem:"إضافة منتج",editOn:"تعديل",editOff:"عرض",
+    categories:[
+      {id:"coffee",icon:"☕",name:"القهوة",desc:"مشروباتنا المميزة",items:[
+        {id:1,emoji:"☕",badge:"الأكثر طلباً",name:"إسبريسو كلاسيك",desc:"قهوة إسبريسو مركّزة بنكهة عميقة",price:"18",img:""},
+        {id:2,emoji:"🥛",badge:"",name:"لاتيه بالكراميل",desc:"حليب مبخر مع شراب الكراميل الذهبي",price:"26",img:""},
+        {id:3,emoji:"🍫",badge:"جديد",name:"موكا الشوكولاتة",desc:"إسبريسو غني مع شوكولاتة بلجيكية",price:"28",img:""},
+        {id:4,emoji:"☕",badge:"",name:"فلات وايت",desc:"ريسترتو مزدوج مع حليب كريمي ناعم",price:"24",img:""},
+        {id:5,emoji:"🧊",badge:"صيفي",name:"كولد برو",desc:"قهوة مستخلصة بالبرودة لـ 12 ساعة",price:"30",img:""},
+        {id:6,emoji:"☕",badge:"",name:"أمريكانو",desc:"إسبريسو بالماء الساخن لذوق أصيل",price:"20",img:""},
+      ]},
+      {id:"drinks",icon:"🥤",name:"المشروبات",desc:"مشروبات منعشة",items:[
+        {id:7,emoji:"🍃",badge:"منعش",name:"موهيتو نعناع",desc:"نعناع طازج مع الليمون والصودا",price:"22",img:""},
+        {id:8,emoji:"🥭",badge:"",name:"عصير المانجو",desc:"مانجو طازجة مع لبن التوت",price:"25",img:""},
+        {id:9,emoji:"🧋",badge:"مميز",name:"لاتيه المطاط",desc:"شاي أسود قوي مع حليب مكثف",price:"20",img:""},
+        {id:10,emoji:"🍓",badge:"",name:"سموزي التوت",desc:"توت أزرق وفراولة مع عصير التفاح",price:"28",img:""},
+      ]},
+      {id:"food",icon:"🍽️",name:"الطعام",desc:"أطباقنا الشهية",items:[
+        {id:11,emoji:"🧇",badge:"الأفضل",name:"وافل البلجيكي",desc:"وافل هش مع كريمة مخفوقة وشراب التوت",price:"35",img:""},
+        {id:12,emoji:"🥑",badge:"صحي",name:"أفوكادو توست",desc:"خبز محمص مع أفوكادو طازج وبيض",price:"38",img:""},
+        {id:13,emoji:"🥐",badge:"",name:"كرواسون اللوز",desc:"كرواسون طازج محشو بكريمة اللوز",price:"30",img:""},
+        {id:14,emoji:"🍔",badge:"نجمة",name:"برجر المشروم",desc:"برجر أنجوس مع المشروم والجبن الذائب",price:"55",img:""},
+      ]},
+      {id:"desserts",icon:"🍰",name:"الحلويات",desc:"حلاوة لا تُنسى",items:[
+        {id:15,emoji:"🍰",badge:"الأشهر",name:"تشيز كيك نيويورك",desc:"تشيز كيك كريمي مع صوص التوت",price:"38",img:""},
+        {id:16,emoji:"☕",badge:"",name:"تيراميسو إيطالي",desc:"أصابع الليدي مع كريمة المسكاربوني",price:"42",img:""},
+        {id:17,emoji:"🍮",badge:"فرنسي",name:"كريم بروليه",desc:"كريمة فانيليا مع طبقة كراميل مكرمل",price:"40",img:""},
+        {id:18,emoji:"🍫",badge:"",name:"بروني الشوكولاتة",desc:"براوني دافئ مع أيس كريم الفانيليا",price:"35",img:""},
+      ]}
+    ]
+  },
+  en:{
+    logoSub:"Premium Café Experience",toastAdd:"✓ Added",addItem:"Add Item",editOn:"Edit",editOff:"View",
+    categories:[
+      {id:"coffee",icon:"☕",name:"Coffee",desc:"Signature Brews",items:[
+        {id:1,emoji:"☕",badge:"Best Seller",name:"Classic Espresso",desc:"Bold concentrated shot with deep rich flavour",price:"18",img:""},
+        {id:2,emoji:"🥛",badge:"",name:"Caramel Latte",desc:"Steamed milk with golden caramel syrup",price:"26",img:""},
+        {id:3,emoji:"🍫",badge:"New",name:"Chocolate Mocha",desc:"Espresso blended with dark Belgian chocolate",price:"28",img:""},
+        {id:4,emoji:"☕",badge:"",name:"Flat White",desc:"Double ristretto with smooth velvety microfoam",price:"24",img:""},
+        {id:5,emoji:"🧊",badge:"Summer",name:"Cold Brew",desc:"Slow-extracted over 12 hours",price:"30",img:""},
+        {id:6,emoji:"☕",badge:"",name:"Americano",desc:"Espresso with hot water for a clean taste",price:"20",img:""},
+      ]},
+      {id:"drinks",icon:"🥤",name:"Drinks",desc:"Refreshing Beverages",items:[
+        {id:7,emoji:"🍃",badge:"Fresh",name:"Mint Mojito",desc:"Fresh mint, lime and sparkling water",price:"22",img:""},
+        {id:8,emoji:"🥭",badge:"",name:"Mango Juice",desc:"Freshly squeezed mango with berry yoghurt",price:"25",img:""},
+        {id:9,emoji:"🧋",badge:"Special",name:"Rubber Latte",desc:"Strong black tea with condensed milk",price:"20",img:""},
+        {id:10,emoji:"🍓",badge:"",name:"Berry Smoothie",desc:"Blueberries and strawberries with apple juice",price:"28",img:""},
+      ]},
+      {id:"food",icon:"🍽️",name:"Food",desc:"Delicious Dishes",items:[
+        {id:11,emoji:"🧇",badge:"Top Pick",name:"Belgian Waffle",desc:"Crispy waffle with whipped cream and berries",price:"35",img:""},
+        {id:12,emoji:"🥑",badge:"Healthy",name:"Avocado Toast",desc:"Toasted sourdough with avocado and egg",price:"38",img:""},
+        {id:13,emoji:"🥐",badge:"",name:"Almond Croissant",desc:"Buttery croissant with French almond cream",price:"30",img:""},
+        {id:14,emoji:"🍔",badge:"Star",name:"Mushroom Burger",desc:"Angus beef with mushrooms and melted cheese",price:"55",img:""},
+      ]},
+      {id:"desserts",icon:"🍰",name:"Desserts",desc:"Unforgettable Sweetness",items:[
+        {id:15,emoji:"🍰",badge:"Famous",name:"NY Cheesecake",desc:"Creamy cheesecake with red berry coulis",price:"38",img:""},
+        {id:16,emoji:"☕",badge:"",name:"Italian Tiramisu",desc:"Ladyfingers with mascarpone cream",price:"42",img:""},
+        {id:17,emoji:"🍮",badge:"French",name:"Crème Brûlée",desc:"Vanilla custard with caramelised sugar",price:"40",img:""},
+        {id:18,emoji:"🍫",badge:"",name:"Chocolate Brownie",desc:"Warm brownie with vanilla ice cream",price:"35",img:""},
+      ]}
+    ]
+  }
+};
+
+// ============================================================
+// STATE
+// ============================================================
+let lang='ar', editMode=false;
+let pendingUploadTarget=null; // {itemId, catId}
+
+// ============================================================
+// LANG
+// ============================================================
+function setLang(l){
+  lang=l;
+  const isAr=l==='ar';
+  document.documentElement.lang=l;
+  document.documentElement.dir=isAr?'rtl':'ltr';
+  document.getElementById('btnAr').classList.toggle('active',isAr);
+  document.getElementById('btnEn').classList.toggle('active',!isAr);
+  document.getElementById('logoSub').textContent=MENU[l].logoSub;
+  updateEditLabels();
+  buildMenu();
+}
+function updateEditLabels(){
+  const t=MENU[lang];
+  const lbl=document.getElementById('editLbl');
+  lbl.textContent=t.editOff; lbl.className='edit-lbl';
+  document.getElementById('editMode2').textContent=t.editOn;
+}
+
+// ============================================================
+// BUILD
+// ============================================================
+function buildMenu(){
+  const cats=MENU[lang].categories;
+  const nav=document.getElementById('navTabs');
+  const cont=document.getElementById('sectionsContainer');
+  nav.innerHTML=''; cont.innerHTML='';
+  cats.forEach((cat,idx)=>{
+    const btn=document.createElement('button');
+    btn.className='tab-btn'+(idx===0?' active':'');
+    btn.innerHTML=`<span>${cat.icon}</span>${cat.name}`;
+    btn.onclick=()=>switchTab(cat.id,cats);
+    nav.appendChild(btn);
+    const sec=document.createElement('div');
+    sec.className='section'+(idx===0?' active':'');
+    sec.id='sec-'+cat.id;
+    sec.innerHTML=`<div class="section-header"><div class="section-emoji">${cat.icon}</div><div class="section-title">${cat.name}</div><div class="section-desc">${cat.desc}</div></div><div class="menu-grid" id="grid-${cat.id}"></div>`;
+    cont.appendChild(sec);
+    renderGrid(cat);
+  });
+}
+
+function renderGrid(cat){
+  const grid=document.getElementById('grid-'+cat.id);
+  grid.innerHTML='';
+  cat.items.forEach(item=>grid.appendChild(createCard(item,cat)));
+  const addBtn=document.createElement('div');
+  addBtn.className='add-card-btn';
+  addBtn.innerHTML=`<div class="plus-icon">+</div><span>${MENU[lang].addItem}</span>`;
+  addBtn.onclick=()=>addItem(cat);
+  grid.appendChild(addBtn);
+}
+
+function createCard(item,cat){
+  const card=document.createElement('div');
+  card.className='menu-card'+(item.img?' has-img':'');
+  card.dataset.id=item.id;
+  const bgMap={coffee:'rgba(139,94,60,0.15)',drinks:'rgba(45,106,79,0.15)',food:'rgba(181,69,27,0.15)',desserts:'rgba(155,44,142,0.15)'};
+  const bg=bgMap[cat.id]||'rgba(200,169,110,0.1)';
+  const badgeHTML=item.badge?`<div class="card-badge">${item.badge}</div>`:'';
+  const curr=lang==='ar'?'ر.س':'SAR';
+  const isEd=editMode?'true':'false';
+  const imgHTML=item.img?`<img src="${item.img}" alt="${item.name}">`:'';
+  const emojiVisible=item.img?'style="opacity:0;pointer-events:none"':'';
+
+  card.innerHTML=`
+    <button class="card-delete" onclick="deleteItem(${item.id},'${cat.id}')">✕</button>
+    <div class="card-img-wrap">
+      <div class="card-bg-glow" style="background:radial-gradient(circle,${bg},transparent 70%)"></div>
+      ${badgeHTML}
+      ${imgHTML}
+      <div class="card-emoji" ${emojiVisible}>${item.emoji}</div>
+      <div class="img-upload-overlay">
+        <div class="upload-icon">📷</div>
+        <div class="upload-txt">${lang==='ar'?'رفع صورة':'Upload Image'}</div>
+        <button class="remove-img-btn" onclick="removeImg(event,${item.id},'${cat.id}')">${lang==='ar'?'حذف الصورة':'Remove'}</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-name" contenteditable="${isEd}" data-field="name" data-id="${item.id}" data-cat="${cat.id}">${item.name}</div>
+      <div class="card-desc" contenteditable="${isEd}" data-field="desc" data-id="${item.id}" data-cat="${cat.id}">${item.desc}</div>
+      <div class="card-footer">
+        <div class="card-price" contenteditable="${isEd}" data-field="price" data-id="${item.id}" data-cat="${cat.id}"><span class="price-curr">${curr}</span>${item.price}</div>
+        <button class="card-add-btn" onclick="showToast(MENU[lang].toastAdd)">+</button>
+      </div>
+    </div>`;
+
+  // Click on upload overlay (but not the remove button)
+  const overlay=card.querySelector('.img-upload-overlay');
+  overlay.addEventListener('click',e=>{
+    if(!editMode) return;
+    if(e.target.classList.contains('remove-img-btn')) return;
+    triggerUpload(item.id, cat.id);
+  });
+
+  // contenteditable save on blur
+  card.querySelectorAll('[contenteditable]').forEach(el=>{
+    el.addEventListener('blur',()=>{
+      const {field,id:iid,cat:cId}=el.dataset;
+      const c=MENU[lang].categories.find(x=>x.id===cId);
+      if(!c) return;
+      const it=c.items.find(i=>i.id==iid);
+      if(!it) return;
+      if(field==='name') it.name=el.textContent.trim();
+      if(field==='desc') it.desc=el.textContent.trim();
+      if(field==='price') it.price=el.textContent.replace(/ر\.س|SAR/g,'').trim();
+    });
+    el.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();el.blur();}});
+  });
+
+  return card;
+}
+
+// ============================================================
+// LOGO UPLOAD
+// ============================================================
+let logoImg='';
+const logoFileInput=document.getElementById('logoFileInput');
+logoFileInput.addEventListener('change',()=>{
+  const file=logoFileInput.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    logoImg=e.target.result;
+    applyLogo();
+    showToast(lang==='ar'?'✓ تم رفع اللوجو':'✓ Logo uploaded');
+  };
+  reader.readAsDataURL(file);
+});
+function applyLogo(){
+  const wrap=document.getElementById('logoImgWrap');
+  const ph=document.getElementById('logoPlaceholder');
+  const rb=document.getElementById('logoRemoveBtn');
+  if(logoImg){
+    ph.innerHTML=`<img src="${logoImg}" alt="logo" style="width:100%;height:100%;object-fit:contain;border-radius:50%;border:2px solid var(--border);background:var(--surface2);padding:6px;">`;
+    rb.classList.add('visible');
+  } else {
+    ph.innerHTML='☕';
+    rb.classList.remove('visible');
+  }
+}
+function removeLogo(e){
+  e.stopPropagation();
+  logoImg='';
+  applyLogo();
+  showToast(lang==='ar'?'✓ تم حذف اللوجو':'✓ Logo removed');
+}
+
+
+const fileInput=document.getElementById('globalFileInput');
+
+function triggerUpload(itemId, catId){
+  pendingUploadTarget={itemId, catId};
+  fileInput.value='';
+  fileInput.click();
+}
+
+fileInput.addEventListener('change',()=>{
+  const file=fileInput.files[0];
+  if(!file||!pendingUploadTarget) return;
+  const {itemId,catId}=pendingUploadTarget;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const dataUrl=e.target.result;
+    // Save into both lang versions (they share IDs)
+    ['ar','en'].forEach(l=>{
+      const cat=MENU[l].categories.find(c=>c.id===catId);
+      if(!cat) return;
+      const item=cat.items.find(i=>i.id===itemId);
+      if(item) item.img=dataUrl;
+    });
+    // Re-render only the affected grid
+    const cat=MENU[lang].categories.find(c=>c.id===catId);
+    if(cat) renderGrid(cat);
+    showToast(lang==='ar'?'✓ تم رفع الصورة':'✓ Image uploaded');
+    pendingUploadTarget=null;
+  };
+  reader.readAsDataURL(file);
+});
+
+function removeImg(e, itemId, catId){
+  e.stopPropagation();
+  ['ar','en'].forEach(l=>{
+    const cat=MENU[l].categories.find(c=>c.id===catId);
+    if(!cat) return;
+    const item=cat.items.find(i=>i.id===itemId);
+    if(item) item.img='';
+  });
+  const cat=MENU[lang].categories.find(c=>c.id===catId);
+  if(cat) renderGrid(cat);
+  showToast(lang==='ar'?'✓ تم حذف الصورة':'✓ Image removed');
+}
+
+// ============================================================
+// CONTROLS
+// ============================================================
+function switchTab(id,cats){
+  cats=cats||MENU[lang].categories;
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',cats[i].id===id));
+  document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active',s.id==='sec-'+id));
+}
+
+const ADMIN_PASS = '1234'; // ← غيّر الرقم السري هنا
+
+function toggleEdit(){
+  if(!editMode){
+    const pass = prompt(lang==='ar'?'أدخل كلمة السر:':'Enter password:');
+    if(pass !== ADMIN_PASS){
+      alert(lang==='ar'?'❌ كلمة السر غلط!':'❌ Wrong password!');
+      return;
+    }
+  }
+  editMode=!editMode;
+  document.body.classList.toggle('editing',editMode);
+  document.getElementById('editToggle').classList.toggle('on',editMode);
+  updateEditLabels();
+  buildMenu();
+}
+
+function addItem(cat){
+  const newId=Date.now();
+  const newItem={id:newId,emoji:'🍽️',badge:'',name:lang==='ar'?'منتج جديد':'New Item',desc:lang==='ar'?'وصف المنتج':'Description',price:'00',img:''};
+  // add to both langs
+  ['ar','en'].forEach(l=>{
+    const c=MENU[l].categories.find(x=>x.id===cat.id);
+    if(c) c.items.push({...newItem});
+  });
+  renderGrid(cat);
+  showToast(lang==='ar'?'✓ تمت الإضافة':'✓ Added');
+}
+
+function deleteItem(id,catId){
+  ['ar','en'].forEach(l=>{
+    const cat=MENU[l].categories.find(c=>c.id===catId);
+    if(cat) cat.items=cat.items.filter(i=>i.id!=id);
+  });
+  const cat=MENU[lang].categories.find(c=>c.id===catId);
+  if(cat) renderGrid(cat);
+  showToast(lang==='ar'?'✓ تم الحذف':'✓ Deleted');
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// Particles
+function spawnParticle(){
+  const emojis=['☕','🍰','🥐','🧋','🍫','🌸','🥑','🍓'];
+  const el=document.createElement('div');
+  el.className='particle';
+  el.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+  el.style.cssText=`left:${Math.random()*100}vw;animation-duration:${8+Math.random()*12}s;animation-delay:${Math.random()*4}s;font-size:${0.8+Math.random()*1.2}rem`;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),20000);
+}
+setInterval(spawnParticle,3000);
+spawnParticle();spawnParticle();spawnParticle();
+
+// INIT
+buildMenu();
+</script>
+</body>
+</html>
